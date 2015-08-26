@@ -31,8 +31,7 @@ void sort_prefs(pref_t *the_set, unsigned int the_set_size){
 void init(unsigned char * the_filename, pref_t *the_set, unsigned char * the_ephemeral_key){
     unsigned char pref[MAX_STRLEN];
     unsigned char hashed_pref[crypto_hash_sha256_BYTES];
-    pref_t element;
-    unsigned int i = 0, j;
+    unsigned int i = 0;
     FILE* prefs;
     if(prefs = fopen(the_filename, "r")){
         while(!feof(prefs)){
@@ -85,7 +84,6 @@ void* alice_thread(void* v){
 
     int i;
     for(i = 0; i < MAX_SET_SIZE; i++){
-        int sent = 0, recv = 0;
         // send Alice's first point
         write(network_ab[1], alices_private_set[i].encrypted_pref, POINT_SIZE);
 
