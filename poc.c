@@ -56,11 +56,7 @@ unsigned int init(unsigned char * the_filename, pref_t *the_set, unsigned char *
         while(!feof(prefs)){
             if(fgets(pref, MAX_STRLEN, prefs)){
                 crypto_hash_sha256(hashed_pref, pref, strlen(pref));
-                crypto_scalarmult_curve25519(element.encrypted_pref, the_ephemeral_key, hashed_pref);
-                memcpy(the_set[i].encrypted_pref, element.encrypted_pref, POINT_SIZE);
-                //printf("EPref: ");
-                //print_hex(element.encrypted_pref, POINT_SIZE);
-                memset(&element, 0x0, sizeof(element));
+                crypto_scalarmult_curve25519(the_set[i].encrypted_pref, the_ephemeral_key, hashed_pref);
                 i++;
             }
         }
@@ -70,35 +66,21 @@ unsigned int init(unsigned char * the_filename, pref_t *the_set, unsigned char *
 }
 
 void update(pref_t * the_set, unsigned int the_set_size, unsigned char * the_ephemeral_key){
-    unsigned int i = 0, j = 0;
-    pref_t temp_pref;
+    unsigned int i = 0;
     for(i = 0; i < the_set_size; i++){
-        crypto_scalarmult_curve25519(temp_pref.encrypted_pref, the_ephemeral_key, the_set[i].encrypted_pref);
-        memcpy(the_set[i].encrypted_pref, temp_pref.encrypted_pref, POINT_SIZE);
-        //printf("EPref2: ");
-        //print_hex(temp_pref.encrypted_pref, POINT_SIZE);
+        crypto_scalarmult_curve25519(the_set[i].encrypted_pref, the_ephemeral_key, the_set[i].encrypted_pref);
     }
 }
 
 void main(int argc, char* argv[]){
     initialize_ephemeral_keys();
 
-    //printf("Alices key: ");
-    //print_hex(alices_ephemeral_key, POINT_SIZE);
-
-    //printf("Bobs key:   ");
-    //print_hex(bobs_ephemeral_key, POINT_SIZE);
-
     // load, hash & encrypt all preferences
-    //printf("Alices set\n");
     alices_set_size = init("alice.txt", alices_private_set, alices_ephemeral_key);
     sort_prefs(alices_private_set, alices_set_size);
-    //printf("%u elements\n", alices_set_size);
 
-    //printf("Bobs set\n");
     bobs_set_size = init("bob.txt", bobs_private_set, bobs_ephemeral_key);
     sort_prefs(bobs_private_set, bobs_set_size);
-    //printf("%u elements\n", bobs_set_size);
 
     // all the preferences are loaded with a new ephemeral key
     // bob exponentiates the data he got from alice and sends this + his own
@@ -114,7 +96,7 @@ void main(int argc, char* argv[]){
     pref_t *found;
     // both can now find common preferences
     // this example is alice
-    for(i = 0; i < (bobs_set_size > alices_set_size ? bobs_set_size : alices_set_size); i++){
+    for(i = 0; i < alices_set_size; i++){
         found = bsearch(alices_private_set+i, bobs_private_set, bobs_set_size, sizeof(pref_t), compare_prefs);
         if(found){
             if(prefs = fopen("alice.txt", "r")){
