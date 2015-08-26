@@ -45,7 +45,7 @@ void init(unsigned char * the_filename, pref_t *the_set, unsigned char * the_eph
         }
         fclose(prefs);
     }
-    for(j = i; j < MAX_SET_SIZE; j++){
+    for(; i < MAX_SET_SIZE; i++){
         randombytes(the_set[i].encrypted_pref, POINT_SIZE);
     }
 }
