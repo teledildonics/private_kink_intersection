@@ -28,11 +28,11 @@ void sort_prefs(pref_t *the_set, unsigned int the_set_size){
     qsort(the_set, the_set_size, sizeof(pref_t), compare_prefs);
 }
 
-unsigned int init(unsigned char * the_filename, pref_t *the_set, unsigned char * the_ephemeral_key){
+void init(unsigned char * the_filename, pref_t *the_set, unsigned char * the_ephemeral_key){
     unsigned char pref[MAX_STRLEN];
     unsigned char hashed_pref[crypto_hash_sha256_BYTES];
     pref_t element;
-    unsigned int i = 0;
+    unsigned int i = 0, j;
     FILE* prefs;
     if(prefs = fopen(the_filename, "r")){
         while(!feof(prefs)){
@@ -45,7 +45,9 @@ unsigned int init(unsigned char * the_filename, pref_t *the_set, unsigned char *
         }
         fclose(prefs);
     }
-    return i;
+    for(j = i; j < MAX_SET_SIZE; j++){
+        randombytes(the_set[i].encrypted_pref, POINT_SIZE);
+    }
 }
 
 void compare(pref_t *set_a, pref_t *set_b, unsigned char * data_file){
@@ -74,13 +76,12 @@ void* alice_thread(void* v){
     pref_t bobs_private_set[MAX_SET_SIZE];
     pref_t shared_private_set[MAX_SET_SIZE];
     memset(alices_private_set, -1, sizeof(alices_private_set));
-    unsigned int alices_set_size;
     unsigned char alices_ephemeral_key[POINT_SIZE];
 
     randombytes(alices_ephemeral_key, POINT_SIZE);
 
-    alices_set_size = init("alice.txt", alices_private_set, alices_ephemeral_key);
-    sort_prefs(alices_private_set, alices_set_size);
+    init("alice.txt", alices_private_set, alices_ephemeral_key);
+    sort_prefs(alices_private_set, MAX_SET_SIZE);
 
     int i;
     for(i = 0; i < MAX_SET_SIZE; i++){
@@ -121,13 +122,12 @@ void* bob_thread(void* v){
     pref_t alices_private_set[MAX_SET_SIZE];
     pref_t shared_private_set[MAX_SET_SIZE];
     memset(bobs_private_set, -1, sizeof(alices_private_set));
-    unsigned int bobs_set_size;
     unsigned char bobs_ephemeral_key[POINT_SIZE];
 
     randombytes(bobs_ephemeral_key,POINT_SIZE);
 
-    bobs_set_size = init("bob.txt", bobs_private_set, bobs_ephemeral_key);
-    sort_prefs(bobs_private_set, bobs_set_size);
+    init("bob.txt", bobs_private_set, bobs_ephemeral_key);
+    sort_prefs(bobs_private_set, MAX_SET_SIZE);
 
     int i;
     for(i = 0; i < MAX_SET_SIZE; i++){
