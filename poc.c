@@ -96,6 +96,7 @@ int network_ab[2], network_ba[2];
 void* alice_thread(void* v){
     pref_t alices_private_set[MAX_SET_SIZE];
     pref_t bobs_private_set[MAX_SET_SIZE];
+    pref_t shared_private_set[MAX_SET_SIZE];
     memset(alices_private_set, -1, sizeof(alices_private_set));
     unsigned int alices_set_size;
     unsigned char alices_ephemeral_key[POINT_SIZE];
@@ -112,7 +113,15 @@ void* alice_thread(void* v){
         write(network_ab[1], alices_private_set[i].encrypted_pref, POINT_SIZE);
 
         // get it back encrypted
-        read(network_ba[0], alices_private_set[i].encrypted_pref, POINT_SIZE);
+        read(network_ba[0], shared_private_set[i].encrypted_pref, POINT_SIZE);
+        shared_private_set[i].offset = alices_private_set[i].offset;
+        pref_t temp_pref;
+        memcpy(temp_pref.encrypted_pref, shared_private_set[i], POINT_SIZE);
+        sort_prefs(shared_private_set, MAX_SET_SIZE);
+        pref_t *result = bsearch(temp_pref, shared_private_set, i, sizeof(pref_t), compare_prefs);
+        if(result){
+            // duplicate ciphertext received, ABORT
+        }
 
         // get their first point
         read(network_ba[0], bobs_private_set[i].encrypted_pref, POINT_SIZE);
@@ -124,7 +133,6 @@ void* alice_thread(void* v){
         write(network_ab[1], bobs_private_set[i].encrypted_pref, POINT_SIZE);
     }
 
-    sort_prefs(alices_private_set, MAX_SET_SIZE);
     sort_prefs(bobs_private_set, MAX_SET_SIZE);
     compare(alices_private_set, bobs_private_set, "alice.txt");
 }
