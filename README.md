@@ -5,4 +5,4 @@ The protocol is explained in [this paper](http://www.cs.cornell.edu/aevf/researc
 
 Building
 ========
-    gcc -o poc poc.c -L $NACLDIR/build/<yourmachine>/lib/<yourplatform>/ -I $NACLDIR/build/<yourmachine>/include/<yourplatform>/ $NACLDIR/randombytes/devurandom.c -lnacl
+    gcc -o poc poc.c -L $NACLDIR/build/<yourmachine>/lib/<yourplatform>/ -I $NACLDIR/build/<yourmachine>/include/<yourplatform>/ $NACLDIR/randombytes/devurandom.c -lnacl -lpthread

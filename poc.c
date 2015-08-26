@@ -48,14 +48,6 @@ unsigned int init(unsigned char * the_filename, pref_t *the_set, unsigned char *
     return i;
 }
 
-void print_hex(unsigned char * bytes, unsigned int length){
-    unsigned int i = 0;
-    for(i = 0; i < POINT_SIZE; i++){
-        printf("%02x", bytes[i]);
-    }
-    printf("\n");
-}
-
 void compare(pref_t *set_a, pref_t *set_b, unsigned char * data_file){
     int i;
     unsigned char pref[MAX_STRLEN];
