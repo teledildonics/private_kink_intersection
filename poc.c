@@ -48,22 +48,6 @@ unsigned int init(unsigned char * the_filename, pref_t *the_set, unsigned char *
     return i;
 }
 
-void update(pref_t * the_set, unsigned int the_set_size, unsigned char * the_ephemeral_key){
-    unsigned int i = 0;
-    for(i = 0; i < the_set_size; i++){
-        crypto_scalarmult_curve25519(the_set[i].encrypted_pref, the_ephemeral_key, the_set[i].encrypted_pref);
-    }
-}
-
-int isempty(unsigned char * mem, unsigned int size){
-    unsigned int i, nulls;
-    for(i = 0; i < size; i++){
-        if(mem[i] == 0)
-            nulls++;
-    }
-    return nulls == size;
-}
-
 void print_hex(unsigned char * bytes, unsigned int length){
     unsigned int i = 0;
     for(i = 0; i < POINT_SIZE; i++){
@@ -79,7 +63,7 @@ void compare(pref_t *set_a, pref_t *set_b, unsigned char * data_file){
     FILE* prefs;
     for(i = 0; i < MAX_SET_SIZE; i++){
         found = bsearch(set_a+i, set_b, MAX_SET_SIZE, sizeof(pref_t), compare_prefs);
-        if(found && set_a[i].offset != -1 && !isempty(found->encrypted_pref, POINT_SIZE)){
+        if(found && set_a[i].offset != -1){
             if(prefs = fopen(data_file, "r")){
                 fseek(prefs, set_a[i].offset, SEEK_SET);
                 if(fgets(pref, MAX_STRLEN, prefs)){
