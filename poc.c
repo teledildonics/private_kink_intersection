@@ -48,6 +48,14 @@ unsigned int init(unsigned char * the_filename, pref_t *the_set, unsigned char *
     return i;
 }
 
+void print_hex(unsigned char * bytes, unsigned int length){
+    unsigned int i = 0;
+    for(i = 0; i < POINT_SIZE; i++){
+        printf("%02x", bytes[i]);
+    }
+    printf("\n");
+}
+
 void compare(pref_t *set_a, pref_t *set_b, unsigned char * data_file){
     int i;
     unsigned char pref[MAX_STRLEN];
@@ -95,7 +103,7 @@ void* alice_thread(void* v){
         pref_t *result = bsearch(alices_private_set+i, shared_private_set, i, sizeof(pref_t), compare_prefs);
         if(result != NULL && alices_private_set[i].offset != -1 ){
             // duplicate ciphertext received, ABORT
-            printf("SOMBODY IS CHEATING\n");
+            printf("SOMEBODY IS CHEATING\n");
             exit(0);
         }
 
@@ -147,7 +155,7 @@ void* bob_thread(void* v){
         pref_t *result = bsearch(bobs_private_set+i, shared_private_set, i, sizeof(pref_t), compare_prefs);
         if(result != NULL && bobs_private_set[i].offset != -1 ){
             // duplicate ciphertext received, ABORT
-            printf("SOMBODY IS CHEATING\n");
+            printf("SOMEBODY IS CHEATING\n");
             exit(0);
         }
     }
