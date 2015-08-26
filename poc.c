@@ -113,14 +113,14 @@ void* alice_thread(void* v){
         write(network_ab[1], alices_private_set[i].encrypted_pref, POINT_SIZE);
 
         // get it back encrypted
-        read(network_ba[0], shared_private_set[i].encrypted_pref, POINT_SIZE);
-        shared_private_set[i].offset = alices_private_set[i].offset;
-        pref_t temp_pref;
-        memcpy(temp_pref.encrypted_pref, shared_private_set[i], POINT_SIZE);
-        sort_prefs(shared_private_set, MAX_SET_SIZE);
-        pref_t *result = bsearch(temp_pref, shared_private_set, i, sizeof(pref_t), compare_prefs);
-        if(result){
+        read(network_ba[0], alices_private_set[i].encrypted_pref, POINT_SIZE);
+        memcpy(shared_private_set[i].encrypted_pref, alices_private_set[i].encrypted_pref, POINT_SIZE);
+        sort_prefs(shared_private_set, i);
+        pref_t *result = bsearch(alices_private_set+i, shared_private_set, i, sizeof(pref_t), compare_prefs);
+        if(result != NULL && alices_private_set[i].offset != -1 ){
             // duplicate ciphertext received, ABORT
+            printf("SOMBODY IS CHEATING\n");
+            exit(0);
         }
 
         // get their first point
@@ -140,6 +140,7 @@ void* alice_thread(void* v){
 void* bob_thread(void* v){
     pref_t bobs_private_set[MAX_SET_SIZE];
     pref_t alices_private_set[MAX_SET_SIZE];
+    pref_t shared_private_set[MAX_SET_SIZE];
     memset(bobs_private_set, -1, sizeof(alices_private_set));
     unsigned int bobs_set_size;
     unsigned char bobs_ephemeral_key[POINT_SIZE];
@@ -164,6 +165,15 @@ void* bob_thread(void* v){
 
         // get it back encrypted
         read(network_ab[0], bobs_private_set[i].encrypted_pref, POINT_SIZE);
+
+        memcpy(shared_private_set[i].encrypted_pref, bobs_private_set[i].encrypted_pref, POINT_SIZE);
+        sort_prefs(shared_private_set, MAX_SET_SIZE);
+        pref_t *result = bsearch(bobs_private_set+i, shared_private_set, i, sizeof(pref_t), compare_prefs);
+        if(result != NULL && bobs_private_set[i].offset != -1 ){
+            // duplicate ciphertext received, ABORT
+            printf("SOMBODY IS CHEATING\n");
+            exit(0);
+        }
     }
 
     sort_prefs(alices_private_set, MAX_SET_SIZE);
