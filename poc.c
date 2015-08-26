@@ -89,26 +89,24 @@ void* alice_thread(void* v){
 
         // get it back encrypted
         read(network_ba[0], alices_private_set[i].encrypted_pref, POINT_SIZE);
-        memcpy(shared_private_set[i].encrypted_pref, alices_private_set[i].encrypted_pref, POINT_SIZE);
-        if(alices_private_set[i].offset != -1){
-            // we sent something usable, check if we aren't being cheated upon
-            sort_prefs(shared_private_set, i);
-            pref_t *result = bsearch(alices_private_set+i, shared_private_set, i, sizeof(pref_t), compare_prefs);
-            if(result){
-                // duplicate ciphertext received after we sent something usable, ABORT
-                printf("SOMEBODY IS CHEATING\n");
-                exit(0);
-            }
-        }
-
+        sort_prefs(shared_private_set, MAX_SET_SIZE);
         // get Bob's first point
         read(network_ba[0], bobs_private_set[i].encrypted_pref, POINT_SIZE);
         bobs_private_set[i].offset = 0;
+
+        pref_t *result = bsearch(bobs_private_set+i, shared_private_set, MAX_SET_SIZE, sizeof(pref_t), compare_prefs);
+        if(result){
+            // duplicate ciphertext received after we sent something usable, ABORT
+            printf("ALICE FEELS SOMEBODY IS CHEATING\n");
+            exit(0);
+        }
+        memcpy(shared_private_set[i].encrypted_pref, bobs_private_set[i].encrypted_pref, POINT_SIZE);
 
         // encrypt Bob's point
         crypto_scalarmult_curve25519(bobs_private_set[i].encrypted_pref, alices_ephemeral_key, bobs_private_set[i].encrypted_pref);
         // send it back
         write(network_ab[1], bobs_private_set[i].encrypted_pref, POINT_SIZE);
+
     }
 
     sort_prefs(bobs_private_set, MAX_SET_SIZE);
@@ -132,6 +130,15 @@ void* bob_thread(void* v){
         // receive Alice's first point
         read(network_ab[0], alices_private_set[i].encrypted_pref, POINT_SIZE);
 
+        sort_prefs(shared_private_set, MAX_SET_SIZE);
+        pref_t *result = bsearch(alices_private_set+i, shared_private_set, MAX_SET_SIZE, sizeof(pref_t), compare_prefs);
+        if(result){
+            // duplicate ciphertext received after we sent something usable, ABORT
+            printf("BOB FEELS SOMEBODY IS CHEATING\n");
+            exit(0);
+        }
+        memcpy(shared_private_set[i].encrypted_pref, alices_private_set[i].encrypted_pref, POINT_SIZE);
+
         // encrypt Alice's point and send it back
         crypto_scalarmult_curve25519(alices_private_set[i].encrypted_pref, bobs_ephemeral_key, alices_private_set[i].encrypted_pref);
         write(network_ba[1], alices_private_set[i].encrypted_pref, POINT_SIZE);
@@ -142,18 +149,6 @@ void* bob_thread(void* v){
 
         // get it back encrypted
         read(network_ab[0], bobs_private_set[i].encrypted_pref, POINT_SIZE);
-
-        memcpy(shared_private_set[i].encrypted_pref, bobs_private_set[i].encrypted_pref, POINT_SIZE);
-        if(bobs_private_set[i].offset != -1){
-            // we sent something usable, check if we aren't being cheated upon
-            sort_prefs(shared_private_set, MAX_SET_SIZE);
-            pref_t *result = bsearch(bobs_private_set+i, shared_private_set, i, sizeof(pref_t), compare_prefs);
-            if(result){
-                // duplicate ciphertext received after we sent something usable, ABORT
-                printf("SOMEBODY IS CHEATING\n");
-                exit(0);
-            }
-        }
     }
 
     sort_prefs(alices_private_set, MAX_SET_SIZE);
