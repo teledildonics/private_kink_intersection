@@ -35,13 +35,9 @@ def compare(set_a, set_b, own):
             conclusions.append(("I like to " + own[i] + " and they like to " + complement_map[own[i]]))
     return conclusions
 
-from binascii import hexlify
-import os
 import nacl.utils
-import random
 def alice(network_ab, alices_prefs_count):
     # Alice sends her wants
-    #alices_wants = list(set([random.choice(complement_map.keys()) for i in range(0, alices_prefs_count)]))
     alices_wants = map(lambda x: x.strip(), file("alice.txt").readlines())
     alices_prefs_count = len(alices_wants)
     alices_ephemeral_key = nacl.utils.random(16)
