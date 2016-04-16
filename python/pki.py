@@ -35,7 +35,7 @@ def compare(set_a, set_b, own):
     return conclusions
 
 import nacl.utils
-def alice(network_ab, alices_prefs_count):
+def alice(network_ab):
     # Alice sends her wants
     alices_prefs = map(lambda x: x.strip(), file("alice.txt").readlines())
     alices_prefs_count = len(alices_prefs)
@@ -66,7 +66,7 @@ def alice(network_ab, alices_prefs_count):
     for i in compare(alices_encrypted_wants, bobs_encrypted_haves, alices_prefs):
         print "Alice learned:", i
 
-def bob(network_ba, bobs_prefs_count):
+def bob(network_ba):
     # Bob sends his haves
     bobs_prefs = map(lambda x: x.strip(), file("bob.txt").readlines())
     bobs_ephemeral_key = nacl.utils.random(16)
@@ -102,8 +102,8 @@ from multiprocessing import Process, Pipe
 
 network_ab, network_ba = Pipe()
 
-b=Process(target=bob, args=(network_ba,24))
-a=Process(target=alice, args=(network_ab,24))
+b=Process(target=bob, args=(network_ba,))
+a=Process(target=alice, args=(network_ab,))
 a.start()
 b.start()
 a.join()
