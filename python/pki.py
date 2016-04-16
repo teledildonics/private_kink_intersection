@@ -3,12 +3,16 @@
 f=file('mojo_upgrade.txt')
 j=f.readlines()
 reciprocal_map = {}
-for i in range(0,len(j),2):
+i = 0
+while i < len(j):
     if j[i][0] != '#' and j[i].strip() != '':
         a=j[i].strip()
         b=j[i+1].strip()
+        print a,b
         reciprocal_map[a] = b
         reciprocal_map[b] = a
+        i += 1
+    i += 1
 
 from nacl.hash import sha256
 from nacl import bindings as c
