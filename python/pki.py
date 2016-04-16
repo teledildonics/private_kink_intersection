@@ -8,7 +8,6 @@ while i < len(j):
     if j[i][0] != '#' and j[i].strip() != '':
         a=j[i].strip()
         b=j[i+1].strip()
-        print a,b
         reciprocal_map[a] = b
         reciprocal_map[b] = a
         i += 1
