@@ -32,16 +32,16 @@ def compare(set_a, set_b, own):
     for i in range(0,len(set_a)):
         a = set_a[i]
         if a in set_b:
-            conclusions.append(("I like to " + own[i] + " and they like to " + complement_map[own[i]]))
+            conclusions.append(("I like '" + own[i] + "' and they like '" + complement_map[own[i]]) + "'")
     return conclusions
 
 import nacl.utils
 def alice(network_ab, alices_prefs_count):
     # Alice sends her wants
-    alices_wants = map(lambda x: x.strip(), file("alice.txt").readlines())
-    alices_prefs_count = len(alices_wants)
+    alices_prefs = map(lambda x: x.strip(), file("alice.txt").readlines())
+    alices_prefs_count = len(alices_prefs)
     alices_ephemeral_key = nacl.utils.random(16)
-    alices_encrypted_wants = init(alices_wants, alices_ephemeral_key, False)
+    alices_encrypted_wants = init(alices_prefs, alices_ephemeral_key, False)
     # negotiate set size
     network_ab.send(alices_prefs_count)
     bobs_prefs_count = network_ab.recv()
@@ -64,15 +64,15 @@ def alice(network_ab, alices_prefs_count):
         if len(set.intersection(set(bobs_encrypted_haves), set(alices_encrypted_wants))) < i/10:
             print "Alice feels like this is going nowhere"
         network_ab.send(bobs_encrypted_haves[-1])
-    for i in compare(alices_encrypted_wants, bobs_encrypted_haves, alices_wants):
+    for i in compare(alices_encrypted_wants, bobs_encrypted_haves, alices_prefs):
         print "Alice learned:", i
 
 def bob(network_ba, bobs_prefs_count):
     # Bob sends his haves
-    bobs_haves = map(lambda x: x.strip(), file("bob.txt").readlines())
+    bobs_prefs = map(lambda x: x.strip(), file("bob.txt").readlines())
     bobs_ephemeral_key = nacl.utils.random(16)
-    bobs_encrypted_haves = init(bobs_haves, bobs_ephemeral_key, True)
-    bobs_prefs_count = len(bobs_haves)
+    bobs_encrypted_haves = init(bobs_prefs, bobs_ephemeral_key, True)
+    bobs_prefs_count = len(bobs_prefs)
     # negotiate set size
     alices_prefs_count = network_ba.recv()
     if bobs_prefs_count > alices_prefs_count:
@@ -96,7 +96,7 @@ def bob(network_ba, bobs_prefs_count):
         network_ba.send(bobs_encrypted_haves[i])
         # get it back encrypted
         bobs_encrypted_haves[i] = network_ba.recv()
-    for i in compare(bobs_encrypted_haves, alices_encrypted_wants, bobs_haves):
+    for i in compare(bobs_encrypted_haves, alices_encrypted_wants, bobs_prefs):
         print "Bob learned:", i
 
 from multiprocessing import Process, Pipe
