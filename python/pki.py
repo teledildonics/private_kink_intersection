@@ -2,14 +2,13 @@
 
 f=file('mojo_upgrade.txt')
 j=f.readlines()
-complement_map = {}
+reciprocal_map = {}
 for i in range(0,len(j),2):
     if j[i][0] != '#' and j[i].strip() != '':
         a=j[i].strip()
         b=j[i+1].strip()
-        #print a,b
-        complement_map[a] = b
-        complement_map[b] = a
+        reciprocal_map[a] = b
+        reciprocal_map[b] = a
 
 from nacl.hash import sha256
 from nacl import bindings as c
@@ -18,8 +17,8 @@ def init(prefs, the_ephemeral_key, has=False):
     encrypted_prefs = []
     for pref in prefs:
         if not has:
-            hashed_complement_pref = sha256(complement_map[pref])
-            want_pref = c.crypto_scalarmult(the_ephemeral_key, hashed_complement_pref)
+            hashed_reciprocal_pref = sha256(reciprocal_map[pref])
+            want_pref = c.crypto_scalarmult(the_ephemeral_key, hashed_reciprocal_pref)
             encrypted_prefs.append(want_pref)
         else:
             hashed_pref = sha256(pref)
@@ -32,7 +31,7 @@ def compare(set_a, set_b, own):
     for i in range(0,len(set_a)):
         a = set_a[i]
         if a in set_b:
-            conclusions.append(("I like '" + own[i] + "' and they like '" + complement_map[own[i]]) + "'")
+            conclusions.append(("I like '" + own[i] + "' and they like '" + reciprocal_map[own[i]]) + "'")
     return conclusions
 
 import nacl.utils
