@@ -1,3 +1,5 @@
+# Copyright (C) 2016 Teledildonics group
+
 f=file('mojo_upgrade.txt')
 j=f.readlines()
 complement_map = {}
@@ -39,7 +41,8 @@ import nacl.utils
 import random
 def alice(network_ab, alices_prefs_count):
     # Alice sends her wants
-    alices_wants = list(set([random.choice(complement_map.keys()) for i in range(0, alices_prefs_count)]))
+    #alices_wants = list(set([random.choice(complement_map.keys()) for i in range(0, alices_prefs_count)]))
+    alices_wants = map(lambda x: x.strip(), file("alice.txt").readlines())
     alices_prefs_count = len(alices_wants)
     alices_ephemeral_key = nacl.utils.random(16)
     alices_encrypted_wants = init(alices_wants, alices_ephemeral_key, False)
@@ -70,7 +73,7 @@ def alice(network_ab, alices_prefs_count):
 
 def bob(network_ba, bobs_prefs_count):
     # Bob sends his haves
-    bobs_haves = list(set([random.choice(complement_map.keys()) for i in range(0, bobs_prefs_count)]))
+    bobs_haves = map(lambda x: x.strip(), file("bob.txt").readlines())
     bobs_ephemeral_key = nacl.utils.random(16)
     bobs_encrypted_haves = init(bobs_haves, bobs_ephemeral_key, True)
     bobs_prefs_count = len(bobs_haves)
