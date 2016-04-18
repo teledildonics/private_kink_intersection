@@ -41,7 +41,7 @@ import nacl.utils
 def alice(network):
     # Alice sends her wants
     alices_prefs = map(lambda x: x.strip(), file("alice.txt").readlines())
-    alices_ephemeral_key = nacl.utils.random(16)
+    alices_ephemeral_key = nacl.utils.random(32)
     alices_encrypted_wants = init(alices_prefs, alices_ephemeral_key, False)
     # negotiate set size
     alices_prefs_count = len(alices_prefs)
@@ -72,7 +72,7 @@ def alice(network):
 def bob(network):
     # Bob sends his haves
     bobs_prefs = map(lambda x: x.strip(), file("bob.txt").readlines())
-    bobs_ephemeral_key = nacl.utils.random(16)
+    bobs_ephemeral_key = nacl.utils.random(32)
     bobs_encrypted_haves = init(bobs_prefs, bobs_ephemeral_key, True)
     # negotiate set size
     bobs_prefs_count = len(bobs_prefs)
